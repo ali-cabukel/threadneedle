@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Threadneedle runtime data (PDFs, parsed cache, Chroma, checkpoints)
+data/
