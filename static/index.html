@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Threadneedle</title>
+  <style>
+    :root {
+      --navy: #0b1f3a;
+      --ink: #14233a;
+      --gold: #c4a35a;
+      --cream: #f6f1e8;
+      --paper: #fffdf8;
+      --line: #d9d0c1;
+      --muted: #6b7280;
+      --tool: #eef3f8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background: var(--cream);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+    .brand p {
+      margin: 0.15rem 0 0;
+      color: var(--gold);
+      font-size: 0.85rem;
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 0.45rem 0.9rem;
+      font: inherit;
+      font-size: 0.92rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.ghost:hover { background: rgba(196, 163, 90, 0.15); }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1rem;
+      min-height: 0;
+    }
+    #log {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      padding: 0.5rem 0 1rem;
+    }
+    .msg {
+      max-width: 85%;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      line-height: 1.45;
+    }
+    .user {
+      align-self: flex-end;
+      background: var(--navy);
+      color: var(--cream);
+      white-space: pre-wrap;
+    }
+    .assistant {
+      align-self: flex-start;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .chip {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.72rem;
+      background: var(--tool);
+      border: 1px solid #c5d0dc;
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      color: #345;
+    }
+    .chip.running { border-color: var(--gold); }
+    .body {
+      font-size: 1rem;
+    }
+    .body > :first-child { margin-top: 0; }
+    .body > :last-child { margin-bottom: 0; }
+    .body p, .body ul, .body ol, .body blockquote, .body pre, .body table {
+      margin: 0.45em 0;
+    }
+    .body h1, .body h2, .body h3, .body h4 {
+      font-size: 1.05em;
+      margin: 0.75em 0 0.35em;
+      line-height: 1.3;
+    }
+    .body ul, .body ol { padding-left: 1.3em; }
+    .body li { margin: 0.15em 0; }
+    .body a { color: var(--navy); }
+    .body blockquote {
+      border-left: 3px solid var(--gold);
+      padding: 0.1em 0 0.1em 0.75em;
+      color: #3d4a5c;
+    }
+    .body code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86em;
+      background: #f3eee4;
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    .body pre {
+      background: #f3eee4;
+      padding: 0.65rem 0.75rem;
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+    .body pre code {
+      background: none;
+      padding: 0;
+      font-size: 0.82rem;
+    }
+    .body table {
+      border-collapse: collapse;
+      font-size: 0.9em;
+      display: block;
+      overflow-x: auto;
+    }
+    .body th, .body td {
+      border: 1px solid var(--line);
+      padding: 0.25em 0.55em;
+      text-align: left;
+    }
+    .actions {
+      display: flex;
+      gap: 0.1rem;
+      margin-top: 0.55rem;
+    }
+    button.icon {
+      background: transparent;
+      color: var(--muted);
+      border: 0;
+      border-radius: 8px;
+      padding: 0.3rem;
+      cursor: pointer;
+      line-height: 0;
+    }
+    button.icon:hover:not(:disabled) {
+      background: var(--tool);
+      color: var(--navy);
+    }
+    button.icon:disabled { opacity: 0.35; cursor: default; }
+    button.icon.active.up { color: #1f7a4d; background: #e7f6ee; }
+    button.icon.active.down { color: #9b1c1c; background: #fdecec; }
+    .cites {
+      margin-top: 0.7rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--line);
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .cites a { color: var(--navy); }
+    form {
+      display: flex;
+      gap: 0.6rem;
+      padding: 0.75rem 0 0.25rem;
+      border-top: 1px solid var(--line);
+    }
+    textarea {
+      flex: 1;
+      resize: none;
+      min-height: 3.2rem;
+      max-height: 8rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font: inherit;
+      background: var(--paper);
+    }
+    button.send {
+      background: var(--navy);
+      color: var(--cream);
+      border: 0;
+      border-radius: 10px;
+      padding: 0 1.1rem;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.send:disabled { opacity: 0.5; cursor: wait; }
+    .hint {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 0.3rem 0 0;
+    }
+    .error { color: #9b1c1c; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Threadneedle</h1>
+      <p>UK macro policy — Bank of England, ONS, HM Treasury</p>
+    </div>
+    <button type="button" class="ghost" id="new-chat">New chat</button>
+  </header>
+  <main>
+    <div id="log"></div>
+    <form id="form">
+      <textarea id="input" rows="2" placeholder="Ask about Bank Rate, services inflation, CPIH, or the Budget…"></textarea>
+      <button type="submit" class="send" id="send">Send</button>
+    </form>
+    <p class="hint">Answers cite indexed documents. Live ONS figures are fetched at query time, not from PDFs.</p>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <script>
+    const logEl = document.getElementById("log");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+    const newChat = document.getElementById("new-chat");
+    const THREAD_KEY = "threadneedle-thread-id";
+    const ICONS = {
+      copy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+      regen: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
+      up: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 10v11"/><path d="M15 21H8a2 2 0 0 1-2-2v-9l5-7 1 1a3 3 0 0 1 .8 3.1L12 10h7a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 17.7 21z"/></svg>',
+      down: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 14V3"/><path d="M9 3h7a2 2 0 0 1 2 2v9l-5 7-1-1a3 3 0 0 1-.8-3.1L12 14H5a2 2 0 0 1-2-2.3l1.4-7A2 2 0 0 1 6.3 3z"/></svg>',
+    };
+
+    if (window.marked) {
+      marked.setOptions({ gfm: true, breaks: true });
+    }
+
+    let abortCtl = null;
+
+    function threadId() {
+      let id = localStorage.getItem(THREAD_KEY);
+      if (!id) {
+        id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
+        localStorage.setItem(THREAD_KEY, id);
+      }
+      return id;
+    }
+
+    function resetThread() {
+      const id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
+      localStorage.setItem(THREAD_KEY, id);
+      return id;
+    }
+
+    function parseSseBlock(block) {
+      let event = "message";
+      let data = "";
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      return data ? { event, data } : null;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[ch]));
+    }
+
+    function renderMarkdown(el, text) {
+      if (window.marked && window.DOMPurify) {
+        el.innerHTML = DOMPurify.sanitize(marked.parse(text || ""));
+      } else {
+        el.textContent = text || "";
+      }
+    }
+
+    function iconButton(action, label, svg) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "icon";
+      btn.dataset.action = action;
+      btn.title = label;
+      btn.setAttribute("aria-label", label);
+      btn.innerHTML = svg;
+      return btn;
+    }
+
+    function refreshRegenButtons() {
+      const bubbles = [...logEl.querySelectorAll(".msg.assistant")];
+      bubbles.forEach((bubble, i) => {
+        const regen = bubble.querySelector('[data-action="regen"]');
+        if (regen) regen.disabled = i !== bubbles.length - 1 || send.disabled;
+      });
+    }
+
+    function attachActions(bubble) {
+      const actions = document.createElement("div");
+      actions.className = "actions";
+      const copy = iconButton("copy", "Copy response", ICONS.copy);
+      const regen = iconButton("regen", "Regenerate", ICONS.regen);
+      const up = iconButton("up", "Good response", ICONS.up);
+      const down = iconButton("down", "Bad response", ICONS.down);
+      up.classList.add("up");
+      down.classList.add("down");
+      actions.append(copy, regen, up, down);
+      bubble.appendChild(actions);
+
+      copy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(bubble.rawText || "");
+          copy.title = "Copied";
+          setTimeout(() => { copy.title = "Copy response"; }, 1200);
+        } catch {
+          copy.title = "Copy failed";
+        }
+      });
+
+      up.addEventListener("click", () => {
+        const on = !up.classList.contains("active");
+        up.classList.toggle("active", on);
+        down.classList.toggle("active", false);
+      });
+      down.addEventListener("click", () => {
+        const on = !down.classList.contains("active");
+        down.classList.toggle("active", on);
+        up.classList.toggle("active", false);
+      });
+
+      regen.addEventListener("click", () => {
+        if (send.disabled) return;
+        const prompt = bubble.prompt || "";
+        if (!prompt) return;
+        startTurn(prompt, { regenerate: true, existing: bubble });
+      });
+      refreshRegenButtons();
+    }
+
+    function addUserBubble(text) {
+      const el = document.createElement("div");
+      el.className = "msg user";
+      el.textContent = text;
+      logEl.appendChild(el);
+      logEl.scrollTop = logEl.scrollHeight;
+      return el;
+    }
+
+    function addAssistantBubble(prompt) {
+      const el = document.createElement("div");
+      el.className = "msg assistant";
+      el.prompt = prompt;
+      el.rawText = "";
+      const tools = document.createElement("div");
+      tools.className = "tools";
+      const body = document.createElement("div");
+      body.className = "body";
+      el.append(tools, body);
+      logEl.appendChild(el);
+      logEl.scrollTop = logEl.scrollHeight;
+      return el;
+    }
+
+    function resetAssistantBubble(bubble) {
+      bubble.rawText = "";
+      const tools = bubble.querySelector(".tools");
+      const body = bubble.querySelector(".body");
+      if (tools) tools.replaceChildren();
+      if (body) {
+        body.classList.remove("error");
+        body.replaceChildren();
+      }
+      bubble.querySelector(".cites")?.remove();
+      bubble.querySelector(".actions")?.remove();
+    }
+
+    function renderCitations(bubble, citations) {
+      bubble.querySelector(".cites")?.remove();
+      if (!citations.length) return;
+      const cites = document.createElement("div");
+      cites.className = "cites";
+      cites.innerHTML = citations.map((c, i) => {
+        const label = [c.title, c.edition, c.page != null ? `p.${c.page}` : null]
+          .filter(Boolean).join(" · ");
+        const href = c.source && String(c.source).startsWith("http") ? c.source : null;
+        return href
+          ? `${i + 1}. <a href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`
+          : `${i + 1}. ${escapeHtml(label)}`;
+      }).join("<br>");
+      bubble.appendChild(cites);
+    }
+
+    function setBusy(busy) {
+      send.disabled = busy;
+      refreshRegenButtons();
+    }
+
+    async function startTurn(message, { regenerate = false, existing = null } = {}) {
+      if (!message || send.disabled) return;
+      if (abortCtl) abortCtl.abort();
+      abortCtl = new AbortController();
+
+      if (!regenerate) addUserBubble(message);
+      const bubble = existing || addAssistantBubble(message);
+      if (existing) {
+        bubble.prompt = message;
+        resetAssistantBubble(bubble);
+      }
+      const tools = bubble.querySelector(".tools");
+      const body = bubble.querySelector(".body");
+      setBusy(true);
+
+      try {
+        const res = await fetch("/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abortCtl.signal,
+          body: JSON.stringify({
+            message,
+            thread_id: threadId(),
+            regenerate: Boolean(regenerate),
+          }),
+        });
+        if (!res.ok || !res.body) {
+          throw new Error(await res.text() || res.statusText);
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        const citations = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const blocks = buffer.split("\n\n");
+          buffer = blocks.pop() ?? "";
+          for (const block of blocks) {
+            const parsed = parseSseBlock(block);
+            if (!parsed) continue;
+            let payload = {};
+            try { payload = JSON.parse(parsed.data); } catch { payload = { text: parsed.data }; }
+
+            if (parsed.event === "token") {
+              bubble.rawText += payload.text || "";
+              renderMarkdown(body, bubble.rawText);
+            } else if (parsed.event === "tool") {
+              const chip = document.createElement("span");
+              chip.className = "chip" + (payload.status === "start" ? " running" : "");
+              chip.textContent = payload.status === "start"
+                ? `${payload.name}…`
+                : payload.name;
+              tools.appendChild(chip);
+            } else if (parsed.event === "citation") {
+              citations.push(payload);
+            } else if (parsed.event === "error") {
+              body.classList.add("error");
+              body.textContent = payload.detail || "Something went wrong.";
+            } else if (parsed.event === "done") {
+              if (payload.text) {
+                bubble.rawText = payload.text;
+                renderMarkdown(body, bubble.rawText);
+              }
+              if (payload.citations) {
+                citations.splice(0, citations.length, ...payload.citations);
+              }
+            }
+            logEl.scrollTop = logEl.scrollHeight;
+          }
+        }
+
+        attachActions(bubble);
+        renderCitations(bubble, citations);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        body.classList.add("error");
+        body.textContent = err.message || String(err);
+        attachActions(bubble);
+      } finally {
+        if (abortCtl) abortCtl = null;
+        setBusy(false);
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+      input.value = "";
+      startTurn(message);
+    });
+
+    newChat.addEventListener("click", () => {
+      if (abortCtl) abortCtl.abort();
+      abortCtl = null;
+      resetThread();
+      logEl.replaceChildren();
+      setBusy(false);
+      input.value = "";
+      input.focus();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  </script>
+</body>
+</html>

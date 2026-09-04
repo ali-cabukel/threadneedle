@@ -1,0 +1,107 @@
+# Document manifest.
+#
+# Every entry becomes a `source` (the stable identity used by the record
+# manager for incremental re-indexing) plus the metadata that the retriever
+# will filter on later. Keep `source` stable across runs — if a URL changes,
+# the old chunks get deleted and new ones written.
+#
+# Live ONS *numbers* are not indexed here. The chatbot fetches them at query
+# time from https://api.beta.ons.gov.uk/v1 so figures are not six months stale.
+
+documents:
+  # --- Bank of England Monetary Policy Reports (quarterly) -----------------
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2025/november/monetary-policy-report-november-2025.pdf
+    publisher: bank_of_england
+    doc_type: monetary_policy_report
+    title: Monetary Policy Report — November 2025
+    publication_date: "2025-11-06"
+    edition: "2025-11"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2025/august/monetary-policy-report-august-2025.pdf
+    publisher: bank_of_england
+    doc_type: monetary_policy_report
+    title: Monetary Policy Report — August 2025
+    publication_date: "2025-08-07"
+    edition: "2025-08"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2025/may/monetary-policy-report-may-2025.pdf
+    publisher: bank_of_england
+    doc_type: monetary_policy_report
+    title: Monetary Policy Report — May 2025
+    publication_date: "2025-05-08"
+    edition: "2025-05"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2025/february/monetary-policy-report-february-2025.pdf
+    publisher: bank_of_england
+    doc_type: monetary_policy_report
+    title: Monetary Policy Report — February 2025
+    publication_date: "2025-02-06"
+    edition: "2025-02"
+
+  # --- Bank of England MPC minutes (matching MPR editions) -----------------
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-summary-and-minutes/2025/monetary-policy-summary-and-minutes-november-2025.pdf
+    publisher: bank_of_england
+    doc_type: mpc_minutes
+    title: MPC Minutes — November 2025
+    publication_date: "2025-11-06"
+    edition: "2025-11"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-summary-and-minutes/2025/monetary-policy-summary-and-minutes-august-2025.pdf
+    publisher: bank_of_england
+    doc_type: mpc_minutes
+    title: MPC Minutes — August 2025
+    publication_date: "2025-08-07"
+    edition: "2025-08"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-summary-and-minutes/2025/monetary-policy-summary-and-minutes-may-2025.pdf
+    publisher: bank_of_england
+    doc_type: mpc_minutes
+    title: MPC Minutes — May 2025
+    publication_date: "2025-05-08"
+    edition: "2025-05"
+
+  - url: https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-summary-and-minutes/2025/monetary-policy-summary-and-minutes-february-2025.pdf
+    publisher: bank_of_england
+    doc_type: mpc_minutes
+    title: MPC Minutes — February 2025
+    publication_date: "2025-02-06"
+    edition: "2025-02"
+
+  # --- ONS statistical bulletins (narrative; numbers come from the live API)
+  - url: https://www.ons.gov.uk/economy/inflationandpriceindices/bulletins/consumerpriceinflation/latest
+    format: html
+    publisher: ons
+    doc_type: statistical_bulletin
+    title: ONS Consumer Price Inflation (latest)
+    edition: latest
+
+  - url: https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes/bulletins/uklabourmarket/latest
+    format: html
+    publisher: ons
+    doc_type: statistical_bulletin
+    title: ONS UK Labour Market (latest)
+    edition: latest
+
+  - url: https://www.ons.gov.uk/economy/grossdomesticproductgdp/bulletins/gdpfirstquarterlyestimateuk/latest
+    format: html
+    publisher: ons
+    doc_type: statistical_bulletin
+    title: ONS GDP first quarterly estimate (latest)
+    edition: latest
+
+  # --- HM Treasury fiscal policy ------------------------------------------
+  - url: https://www.gov.uk/government/publications/budget-2025-document/budget-2025-html
+    format: html
+    publisher: hm_treasury
+    doc_type: fiscal_policy
+    title: Budget 2025
+    publication_date: "2025-11-26"
+    edition: "2025-11"
+
+  - url: https://www.gov.uk/government/publications/spring-statement-2025-document/spring-statement-2025-html
+    format: html
+    publisher: hm_treasury
+    doc_type: fiscal_policy
+    title: Spring Statement 2025
+    publication_date: "2025-03-26"
+    edition: "2025-03"
